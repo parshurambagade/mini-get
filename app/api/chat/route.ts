@@ -7,11 +7,11 @@ const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(request: Request) {
-  const { message } = await request.json();
+  const { query } = await request.json();
 
-  console.log("Message received by server: ", message);
+  console.log("Message received by server: ", query);
 
-  if (!message || !message.trim().length)
+  if (!query || !query.trim().length)
     return NextResponse.json(
       { error: "Message can't be empty!" },
       { status: 400 },
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     },
     {
       role: "user",
-      content: message,
+      content: query,
       // content: "who was the first president of india?",
     },
   ];
@@ -40,7 +40,9 @@ export async function POST(request: Request) {
     const toolCalls = chatCompletion.choices[0]?.message?.tool_calls;
 
     if (!toolCalls) {
-      return Response.json(chatCompletion.choices[0]?.message?.content || "");
+      return Response.json({
+        message: chatCompletion.choices[0]?.message?.content || "",
+      });
     }
 
     // if tool calls are there, then call tools
@@ -90,7 +92,7 @@ export async function getGroqChatCompletion(
       },
     ],
     tool_choice: "auto",
-    model: "llama-3.1-8b-instant",
+    model: "llama-3.3-70b-versatile",
   });
 }
 

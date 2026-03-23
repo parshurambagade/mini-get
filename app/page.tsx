@@ -7,6 +7,7 @@ import PromptBox from "../components/ui/prompt-box";
 export default function Home() {
   const [messages, setMessages] = useState([{ role: "user", content: "Hi" }, { role: "assistant", content: "Hello there, how can I assist you today?" }]);
   const [query, setQuery] = useState("");
+
   return (
     <main>
       <section id="main-container" className="container mx-auto max-w-3xl px-2 py-4">
