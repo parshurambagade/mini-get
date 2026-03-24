@@ -17,11 +17,12 @@ export async function POST(request: Request) {
       { status: 400 },
     );
 
+  const SYSTEM_PROMPT = `${process.env.SYSTEM_PROMPT} ${new Date().toUTCString()}`;
+
   const messages: ChatCompletionMessageParam[] = [
     {
       role: "system",
-      content: `You are a smart ai assistent. Your task is to answer the querries that are asked. You have access to follwing tools: 
-                1. webSearch({query}: {query: string}) // gets latest and realtime data from the internet`,
+      content: SYSTEM_PROMPT,
     },
     {
       role: "user",
@@ -92,7 +93,7 @@ export async function getGroqChatCompletion(
       },
     ],
     tool_choice: "auto",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
   });
 }
 
