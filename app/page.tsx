@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Message from "../components/ui/message";
 import PromptBox from "../components/ui/prompt-box";
+import { IMessage } from "@/types";
 
 export default function Home() {
-  const [messages, setMessages] = useState([{ role: "user", content: "Hi" }, { role: "assistant", content: "Hello there, how can I assist you today?" }]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,7 +19,7 @@ export default function Home() {
 
       const response = await fetch("/api/chat", {
         method: "POST",
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query, messages }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -65,7 +66,7 @@ export default function Home() {
     <main>
       <section id="main-container" className="container mx-auto max-w-3xl px-2 py-4">
         <section id="chat-list" className="pb-32">
-          {messages.length && messages.map((msg, idx) => <Message key={idx} content={msg.content} role={msg.role} />)}
+          {messages.length ? messages.map((msg, idx) => <Message key={idx} content={msg.content} role={msg.role} />) : null}
           {isLoading && <Message content="Thinking..." role="assistant" className="animate-pulse" />}
         </section>
         <section id="prompt-box" className=" fixed bottom-0 w-full inset-x-0 flex justify-center pb-3 bg-neutral-900">

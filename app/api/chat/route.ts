@@ -7,36 +7,36 @@ const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(request: Request) {
-  const { query } = await request.json();
+  const { query, messages } = await request.json();
 
   console.log("Message received by server: ", query);
 
-  if (!query || !query.trim().length)
+  if (!query || !query.trim().length || !messages)
     return NextResponse.json(
-      { error: "Message can't be empty!" },
+      { error: "Message and messages can't be empty!" },
       { status: 400 },
     );
 
   const SYSTEM_PROMPT = `${process.env.SYSTEM_PROMPT} ${new Date().toUTCString()}`;
 
-  const messages: ChatCompletionMessageParam[] = [
+  const localMessages: ChatCompletionMessageParam[] = [
     {
       role: "system",
       content: SYSTEM_PROMPT,
     },
+    ...messages,
     {
       role: "user",
       content: query,
-      // content: "who was the first president of india?",
     },
   ];
 
   while (true) {
     const chatCompletion = await getGroqChatCompletion(
-      messages as ChatCompletionMessageParam[],
+      localMessages as ChatCompletionMessageParam[],
     );
 
-    messages.push(chatCompletion.choices[0]?.message);
+    localMessages.push(chatCompletion.choices[0]?.message);
 
     const toolCalls = chatCompletion.choices[0]?.message?.tool_calls;
 
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
           tool_call_id: tool.id,
           name: functionName,
         };
-        messages.push(message as ChatCompletionMessageParam);
+        localMessages.push(message as ChatCompletionMessageParam);
       }
     }
     // Print the completion returned by the LLM.
