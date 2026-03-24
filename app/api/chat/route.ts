@@ -31,7 +31,17 @@ export async function POST(request: Request) {
     },
   ];
 
+  const MAX_RETRIES = 5;
+  let retries = 0;
+
   while (true) {
+    if (retries >= MAX_RETRIES) {
+      return Response.json({
+        message:
+          "I could not find the information you are looking for, please try again later!",
+      });
+    }
+
     const chatCompletion = await getGroqChatCompletion(
       localMessages as ChatCompletionMessageParam[],
     );
@@ -62,8 +72,8 @@ export async function POST(request: Request) {
         localMessages.push(message as ChatCompletionMessageParam);
       }
     }
-    // Print the completion returned by the LLM.
-    //   console.log(JSON.stringify(chatCompletion.choices[0]?.message) || "");
+
+    retries++;
   }
 }
 
